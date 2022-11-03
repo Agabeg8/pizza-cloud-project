@@ -1,5 +1,6 @@
 package com.cydeo.pizzacloud.controller;
 
+import com.cydeo.pizzacloud.exception.PizzaNotFoundException;
 import com.cydeo.pizzacloud.model.Pizza;
 import com.cydeo.pizzacloud.model.PizzaOrder;
 import com.cydeo.pizzacloud.repository.PizzaRepository;
@@ -7,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.websocket.server.PathParam;
 import java.util.UUID;
 
 @Controller
@@ -20,7 +22,7 @@ public class OrderController {
     }
 
     @GetMapping("/current")
-    public String orderForm(UUID pizzaId, Model model) {
+    public String orderForm(@RequestParam UUID pizzaId, Model model) {
 
         PizzaOrder pizzaOrder = new PizzaOrder();
 
@@ -33,7 +35,7 @@ public class OrderController {
     }
 
     @PostMapping("/{pizzaId}")
-    public String processOrder(UUID pizzaId, PizzaOrder pizzaOrder) {
+    public String processOrder(@PathVariable("pizzaId") UUID pizzaId, PizzaOrder pizzaOrder) {
 
         // Save the order
 
@@ -44,7 +46,8 @@ public class OrderController {
     //TODO
     private Pizza getPizza(UUID pizzaId) {
         // Get the pizza from repository based on it's id
-        return new Pizza();
+        return pizzaRepository.readAll().stream().filter(pizza -> pizza.getId().equals(pizzaId))
+                .findFirst().orElseThrow(() -> new PizzaNotFoundException("Pizza not found"));
     }
 
 }
